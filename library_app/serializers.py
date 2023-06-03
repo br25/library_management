@@ -7,9 +7,15 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BookSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='category.name', read_only=True)
+    quantity = serializers.SerializerMethodField()
+
     class Meta:
         model = Book
-        fields = '__all__'
+        fields = ['id', 'title', 'author', 'publication_date', 'isbn', 'description', 'quantity', 'available', 'category']
+
+    def get_quantity(self, obj):
+        return obj.quantity
 
 class IssuedBookSerializer(serializers.ModelSerializer):
     book = BookSerializer(read_only=True)
@@ -34,3 +40,10 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
+
+    # def update(self, instance, validated_data):
+    #     if not instance.is_completed and validated_data.get('is_completed', False):
+    #         instance.is_completed = True
+    #         instance.book.quantity -= 1
+    #         instance.book.save()
+    #     return super().update(instance, validated_data)

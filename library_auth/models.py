@@ -8,15 +8,17 @@ class User(AbstractUser):
         ('teacher', 'Teacher'),
     )
 
+    username = models.CharField(max_length=100, unique=False)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20)
     address = models.CharField(max_length=200)
     user_role = models.CharField(max_length=20, choices=USER_ROLES)
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.username
-
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

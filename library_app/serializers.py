@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Category, Book, Order, Delivery, Notification, ReturnBook
 
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -73,7 +72,12 @@ class DeliverySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order = validated_data.pop('order_id')
         delivery = Delivery.objects.create(order=order, **validated_data)
-        delivery.save()
+
+        # Decrease the book quantity by 1
+        book = order.book
+        if book:
+            book.quantity -= 1
+            book.save()
 
         order.is_delivered = True
         order.save()
@@ -97,3 +101,15 @@ class ReturnBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReturnBook
         fields = ['id', 'user', 'user_name', 'book_name', 'delivery', 'fine', 'fine_reason']
+
+    def create(self, validated_data):
+        delivery = validated_data['delivery']
+
+        # Increase the book quantity by 1
+        book = delivery.order.book
+        if book:
+            book.quantity += 1
+            book.save()
+
+        return ReturnBook.objects.create(**validated_data)
+        

@@ -4,11 +4,11 @@ from .models import Category, Book, IssuedBook, Order, Delivery
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
-        
+        fields = ['id', 'name']
+
 
 class BookSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(source='category.name')
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     available = serializers.SerializerMethodField()
 
     class Meta:
@@ -49,10 +49,12 @@ class OrderSerializer(serializers.ModelSerializer):
     book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
     book_title = serializers.ReadOnlyField(source='book.title')
     category_name = serializers.ReadOnlyField(source='book.category.name')
+    is_delivered = serializers.BooleanField(read_only=True)
+
 
     class Meta:
         model = Order
-        fields = ['id', 'user', 'email', 'order_date', 'book', 'book_title', 'category_name', 'return_date']
+        fields = ['id', 'user', 'email', 'order_date', 'book', 'book_title', 'category_name', 'return_date', 'is_delivered']
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -70,24 +72,19 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class DeliverySerializer(serializers.ModelSerializer):
     order = OrderSerializer(read_only=True)
-    order_id = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all(), write_only=True)
+    order_id = serializers.PrimaryKeyRelatedField(queryset=Order.objects.filter(is_delivered=False))
 
     class Meta:
         model = Delivery
         fields = ['order', 'order_id', 'tracking_number', 'courier', 'delivery_date']
 
-    def validate_order_id(self, order_id):
-        # Check if a delivery with the same order_id already exists
-        if Delivery.objects.filter(order_id=order_id).exists():
-            raise serializers.ValidationError("A delivery with this order already exists.")
-        return order_id
-
     def create(self, validated_data):
         order = validated_data.pop('order_id')
         delivery = Delivery.objects.create(order=order, **validated_data)
+        delivery.save()
 
-        # Delete the associated order
-        order.delete()
+        order.is_delivered = True
+        order.save()
 
         return delivery
 

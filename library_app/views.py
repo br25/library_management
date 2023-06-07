@@ -31,14 +31,14 @@ class IssuedBookRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
     serializer_class = IssuedBookSerializer
 
 class OrderListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Order.objects.all()
+    queryset = Order.objects.filter(is_delivered=False)
     serializer_class = OrderSerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
 class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Order.objects.all()
+    queryset = Order.objects.filter(is_delivered=False)
     serializer_class = OrderSerializer
 
 
@@ -49,4 +49,3 @@ class DeliveryListCreateAPIView(generics.ListCreateAPIView):
 class DeliveryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Delivery.objects.all()
     serializer_class = DeliverySerializer
-    lookup_field = 'order__id'

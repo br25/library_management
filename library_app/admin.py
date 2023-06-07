@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Book, IssuedBook, Order
+from .models import Category, Book, IssuedBook, Order, Delivery
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -16,6 +16,12 @@ class IssuedBookAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('user', 'book', 'order_date')
+
+
+@admin.register(Delivery)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('order', 'tracking_number', 'courier', 'delivery_date')
+
 
 # You can register other models here if needed
 

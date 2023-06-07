@@ -20,16 +20,6 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
-class IssuedBook(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    issued_date = models.DateField()
-    return_date = models.DateField(null=True, blank=True)
-    fine = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
-    fine_reason = models.CharField(max_length=100, blank=True)
-
-    def __str__(self):
-        return f"Issued Book: {self.book.title}"
-
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
@@ -55,3 +45,12 @@ class Notification(models.Model):
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+
+class ReturnBook(models.Model):
+    delivery = models.OneToOneField(Delivery, on_delete=models.CASCADE, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    fine = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    fine_reason = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"Issued Book: {self.delivery.order.book.title}"

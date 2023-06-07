@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Category, Book, IssuedBook, Order, Delivery
+from .models import Category, Book, Order, Delivery, Notification, ReturnBook
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,6 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     available = serializers.SerializerMethodField()
+    isbn = serializers.CharField()
 
     class Meta:
         model = Book
@@ -21,27 +23,10 @@ class BookSerializer(serializers.ModelSerializer):
         else:
             return f"Out Of Stock. Quantity: {obj.quantity}"
 
-
-
-class IssuedBookSerializer(serializers.ModelSerializer):
-    book = BookSerializer(read_only=True)
-
-    class Meta:
-        model = IssuedBook
-        fields = ['id', 'book', 'issued_date', 'return_date', 'fine', 'fine_reason']
-
-    def create(self, validated_data):
-        issued_book = IssuedBook.objects.create(**validated_data)
-        issued_book.calculate_fine()  # Calculate the fine for the newly issued book
-        return issued_book
-
-    def update(self, instance, validated_data):
-        instance.return_date = validated_data.get('return_date', instance.return_date)
-        instance.fine_reason = validated_data.get('fine_reason', instance.fine_reason)
-        instance.save()
-        instance.calculate_fine()  # Recalculate the fine for the updated issued book
-        return instance
-
+    def validate_isbn(self, value):
+        if value and (len(value) != 13 or not value.isdigit()):
+            raise serializers.ValidationError("ISBN must be a 13-digit number")
+        return value
 
 class OrderSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
@@ -71,12 +56,19 @@ class OrderSerializer(serializers.ModelSerializer):
         return attrs
 
 class DeliverySerializer(serializers.ModelSerializer):
-    order = OrderSerializer(read_only=True)
+    order = serializers.SerializerMethodField()
     order_id = serializers.PrimaryKeyRelatedField(queryset=Order.objects.filter(is_delivered=False))
+    book_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Delivery
-        fields = ['order', 'order_id', 'tracking_number', 'courier', 'delivery_date']
+        fields = ['order', 'order_id', 'tracking_number', 'courier', 'delivery_date', 'book_name']
+
+    def get_order(self, obj):
+        return OrderSerializer(obj.order).data
+
+    def get_book_name(self, obj):
+        return obj.order.book.title if obj.order.book else ''
 
     def create(self, validated_data):
         order = validated_data.pop('order_id')
@@ -90,3 +82,18 @@ class DeliverySerializer(serializers.ModelSerializer):
 
 
 
+class NotificationSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['message', 'user']
+
+class ReturnBookSerializer(serializers.ModelSerializer):
+    user_name = serializers.ReadOnlyField(source='user.username')
+    book_name = serializers.CharField(source='delivery.order.book.title', read_only=True)
+    delivery = serializers.PrimaryKeyRelatedField(queryset=Delivery.objects.all())
+
+    class Meta:
+        model = ReturnBook
+        fields = ['id', 'user', 'user_name', 'book_name', 'delivery', 'fine', 'fine_reason']

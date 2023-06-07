@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_framework import generics, filters
-from .models import Category, Book, IssuedBook, Order, Delivery
-from .serializers import CategorySerializer, BookSerializer, IssuedBookSerializer, OrderSerializer, DeliverySerializer
+from .models import Category, Book, Order, Delivery, Notification, ReturnBook
+from .serializers import CategorySerializer, BookSerializer, ReturnBookSerializer, OrderSerializer, DeliverySerializer, NotificationSerializer
 
 class CategoryListCreateAPIView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -22,14 +22,6 @@ class BookRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
-class IssuedBookListCreateAPIView(generics.ListCreateAPIView):
-    queryset = IssuedBook.objects.all()
-    serializer_class = IssuedBookSerializer
-
-class IssuedBookRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = IssuedBook.objects.all()
-    serializer_class = IssuedBookSerializer
-
 class OrderListCreateAPIView(generics.ListCreateAPIView):
     queryset = Order.objects.filter(is_delivered=False)
     serializer_class = OrderSerializer
@@ -49,3 +41,16 @@ class DeliveryListCreateAPIView(generics.ListCreateAPIView):
 class DeliveryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Delivery.objects.all()
     serializer_class = DeliverySerializer
+
+
+class NotificationListAPIView(generics.ListAPIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+
+class ReturnBookListCreateAPIView(generics.ListCreateAPIView):
+    queryset = ReturnBook.objects.all()
+    serializer_class = ReturnBookSerializer
+
+class ReturnBookRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ReturnBook.objects.all()
+    serializer_class = ReturnBookSerializer

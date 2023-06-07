@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Student, Librarian, Teacher
+from .models import User, Student, Librarian, Teacher
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username')
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:

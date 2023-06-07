@@ -15,7 +15,7 @@ class IssuedBookAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'book', 'order_date', 'is_completed')
+    list_display = ('user', 'book', 'order_date')
 
 # You can register other models here if needed
 

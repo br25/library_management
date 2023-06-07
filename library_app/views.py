@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_framework import generics, filters
-from .models import Category, Book, IssuedBook, Order
-from .serializers import CategorySerializer, BookSerializer, IssuedBookSerializer, OrderSerializer
+from .models import Category, Book, IssuedBook, Order, Delivery
+from .serializers import CategorySerializer, BookSerializer, IssuedBookSerializer, OrderSerializer, DeliverySerializer
 
 class CategoryListCreateAPIView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -16,6 +16,7 @@ class BookListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = BookSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'author']
+
 
 class BookRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
@@ -36,10 +37,16 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    def save(self, *args, **kwargs):
-        is_completed_changed = self.pk is None or self.__class__.objects.filter(pk=self.pk, is_completed=False).exists()
-        super().save(*args, **kwargs)
-        if self.is_completed and is_completed_changed:
-            self.book.quantity -= 1
-            self.book.save()
-            print(self.book)
+class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+
+class DeliveryListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Delivery.objects.all()
+    serializer_class = DeliverySerializer
+
+class DeliveryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Delivery.objects.all()
+    serializer_class = DeliverySerializer
+    lookup_field = 'order__id'

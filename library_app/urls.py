@@ -7,6 +7,9 @@ from .views import (
     IssuedBookListCreateAPIView,
     IssuedBookRetrieveUpdateDestroyAPIView,
     OrderListCreateAPIView,
+    OrderRetrieveUpdateDestroyAPIView,
+    DeliveryListCreateAPIView,
+    DeliveryRetrieveUpdateDestroyAPIView,
 )
 
 
@@ -18,5 +21,7 @@ urlpatterns = [
     path('issued-books/', IssuedBookListCreateAPIView.as_view(), name='issued-book-list'),
     path('issued-books/<int:pk>/', IssuedBookRetrieveUpdateDestroyAPIView.as_view(), name='issued-book-detail'),
     path('orders/', OrderListCreateAPIView.as_view(), name='order-list-create'),
-
+    path('orders/<int:pk>/', OrderRetrieveUpdateDestroyAPIView.as_view(), name='order-retrieve-update-destroy'),
+    path('delivery/', DeliveryListCreateAPIView.as_view(), name='delivery-list-create'),
+    path('delivery/<int:pk>/', DeliveryRetrieveUpdateDestroyAPIView.as_view(), name='delivery-retrieve-update-destroy'),
 ]

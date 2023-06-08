@@ -1,15 +1,19 @@
 from django.urls import path
-from .views import (
-    StudentListCreateView, StudentRetrieveUpdateDestroyView,
-    LibrarianListCreateView, LibrarianRetrieveUpdateDestroyView,
-    TeacherListCreateView, TeacherRetrieveUpdateDestroyView,
-)
+from . import views
 
 urlpatterns = [
-    path('students/', StudentListCreateView.as_view(), name='student-list'),
-    path('students/<int:pk>/', StudentRetrieveUpdateDestroyView.as_view(), name='student-detail'),
-    path('librarians/', LibrarianListCreateView.as_view(), name='librarian-list'),
-    path('librarians/<int:pk>/', LibrarianRetrieveUpdateDestroyView.as_view(), name='librarian-detail'),
-    path('teachers/', TeacherListCreateView.as_view(), name='teacher-list'),
-    path('teachers/<int:pk>/', TeacherRetrieveUpdateDestroyView.as_view(), name='teacher-detail'),
+    # Student
+    path('student/register/', views.StudentRegistrationAPIView.as_view(), name='student-register'),
+    path('student/login/', views.StudentLoginAPIView.as_view(), name='student-login'),
+    path('student/logout/', views.StudentLogoutAPIView.as_view(), name='student-logout'),
+
+    # Librarian
+    path('librarian/register/', views.LibrarianRegistrationAPIView.as_view(), name='librarian-register'),
+    path('librarian/login/', views.LibrarianLoginAPIView.as_view(), name='librarian-login'),
+    path('librarian/logout/', views.LibrarianLogoutAPIView.as_view(), name='librarian-logout'),
+
+    # Teacher
+    path('teacher/register/', views.TeacherRegistrationAPIView.as_view(), name='teacher-register'),
+    path('teacher/login/', views.TeacherLoginAPIView.as_view(), name='teacher-login'),
+    path('teacher/logout/', views.TeacherLogoutAPIView.as_view(), name='teacher-logout'),
 ]

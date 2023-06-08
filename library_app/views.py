@@ -38,6 +38,17 @@ class OrderListAPIView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated, ]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.user_role == 'student':
+            return Order.objects.filter(user=user)
+        elif user.user_role == 'teacher':
+            return Order.objects.filter(user=user)
+        elif user.user_role == 'librarian':
+            return Order.objects.all()
+        else:
+            return Order.objects.none()
+
 class OrderCreateAPIView(generics.CreateAPIView):
     queryset = Order.objects.filter(is_delivered=False)
     serializer_class = OrderSerializer
@@ -64,7 +75,16 @@ class DeliveryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView
 class NotificationListAPIView(generics.ListAPIView):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = [IsAuthenticated, IsStudent, IsTeacher]
+    permission_classes = [IsAuthenticated, IsStudentOrTeacher]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.user_role == 'student':
+            return Notification.objects.filter(user=user)
+        elif user.user_role == 'teacher':
+            return Notification.objects.filter(user=user)
+        else:
+            return Notification.objects.none()
 
 class ReturnBookListCreateAPIView(generics.ListCreateAPIView):
     queryset = ReturnBook.objects.all()
